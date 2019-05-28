@@ -1,3 +1,13 @@
+/**
+ * Copyright Vlad Shamgin (c) 2019
+ * Alphaux Lightning Hints
+ * Topics.js component
+ *
+ * @summary short description for the file
+ * @author Vlad Shamgin <vshamgin@gmail.com>
+ *
+ * Created at     : 2019-05-27
+ */
 import React, { Component } from 'react';
 import '../styles/Topics.css';
 
