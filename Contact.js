@@ -16,6 +16,7 @@ class Contact extends Component {
         super(props);
 
         this.state = {
+            isSubmitDisabled: false,
             buttonSubmitVisibility: 'button-submit-visible',
             thankYouTextVisibility: 'text-thankyou-hidden'
         };
@@ -32,7 +33,7 @@ class Contact extends Component {
             category: 'Contact',
             action: 'Submit attempt'
         });
-        const gatewayUrl = 'https://mygatewayapi/';/** */
+        const gatewayUrl = 'https://myapi';/** */
 
         if(
             !this.validate(this.subjectFormRef.current.value) || 
@@ -44,6 +45,9 @@ class Contact extends Component {
             message: this.textFormRef.current.value
         });
 
+        this.setState({
+            isSubmitDisabled: true
+        });
         fetch(gatewayUrl, {
             method: "POST",
             mode: 'no-cors',
@@ -78,7 +82,6 @@ class Contact extends Component {
         });
     }
     validate = (str) => {
-        
         if(!str || str === ''){
             return false;
         }
@@ -108,7 +111,8 @@ class Contact extends Component {
                     </label>
                     <textarea maxLength="2000" ref={this.textFormRef} required />
                     <span className={this.state.thankYouTextVisibility}>Thank you! You may close the form now</span>
-                    <input 
+                    <input
+                        disabled={this.state.isSubmitDisabled}
                         className={this.state.buttonSubmitVisibility}
                         type="submit" 
                         value="Submit" />
