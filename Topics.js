@@ -5,45 +5,55 @@
  *
  * @summary short description for the file
  * @author Vlad Shamgin <vshamgin@gmail.com>
- *
- * Created at     : 2019-05-27
  */
 import React, { Component } from 'react';
+import ReactGA from 'react-ga';
 import '../styles/Topics.css';
 
 class Topics extends Component {
     constructor(props) {
         super(props);
         this.model = {
-            topics:[
-                {
-                    id: 'alph4t2',
-                    name: 'JavaScript',
-                    url: '/alph4t2'
-                },
-                {
-                    id: 'alph4t1',
-                    name: 'Excuses from Work :)',
-                    url: '/alph4t2'
-                },
-                {
-                    id: null,
-                    name: 'More is coming soon!',
-                    url: ''
-                }
-            ]
+            topics:[]
         };
         this.state = {
-            currentTopic: this.model.topics[0] /** set default topic */
+            currentTopic: {},
+            showHideLoadingStatus: 'show-loading-status'
         };
+        this.topicsAPIUrl = '/getTopics';
         this.prevSelected = null;
         this.onTopicClick= this.handleTopicClick.bind(this);
+        this.loadingStatusText = React.createRef();
     }
     componentDidMount() {
-        this.props.onTopicsMountCallback(this.getDefaultTopic());
+        this.initModel();
     }
-    getDefaultTopic = () => {
-        return this.state.currentTopic;
+    initModel=()=>{
+        new Promise((resolve, reject) =>{
+            fetch(this.topicsAPIUrl)
+            .then(res => res.text())
+            .then(res => {
+                resolve(res);
+            }).catch(err => err) /** todo: load fallback model */
+        }).then((modelFromResponse)=>{
+            this.model = JSON.parse(modelFromResponse).body;
+            this.setState({
+                currentTopic: this.model.topics[0], /** set default topic */
+                showHideLoadingStatus: 'hide-loading-status'
+            });
+            this.props.onTopicsMountCallback(this.state.currentTopic);
+        }).catch((error)=>{
+            /* fallback model */
+            this.model = {
+                topics:[
+                    {
+                        id: 'error',
+                        name: 'Error',
+                        url: ''
+                    }
+                ]
+            }
+        });
     }
     handleTopicClick = (e) => {
         e.currentTarget.className = 'topic-button-clicked';
@@ -63,6 +73,10 @@ class Topics extends Component {
 
         this.prevSelected = e.currentTarget;
 
+        ReactGA.event({
+            category: 'Topic selected',
+            action: topicName
+        });
         this.props.onClickCallback(newTopic);
     }
     getButtonClassName = (el) => {
@@ -94,9 +108,10 @@ class Topics extends Component {
         return (
             <div className="topics-list-container">
                 <span className="topics-selected-text">
-                Choose Hints Category:
+                Choose Lightning Hints topic:
                 </span>
-                <div>
+                <div className="topics-list-content">
+                    <span className={this.state.showHideLoadingStatus}>loading..</span>
                     {this.createTopicsList()}
                 </div>
             </div>
